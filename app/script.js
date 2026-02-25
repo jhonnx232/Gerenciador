@@ -2,7 +2,7 @@
 const { createClient } = supabase; // pega a função do SDK
 
 const SUPABASE_URL = "https://gubkxlyqoxiqunetallh.supabase.co";
-const SUPABASE_ANON_KEY = "lJPfumEnDzlMaMnM";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1Ymt4bHlxb3hpcXVuZXRhbGxoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwMzkzNjYsImV4cCI6MjA4NzYxNTM2Nn0.MhdqRP-ZPbHCFS6TNUODowyOA7Ws9I29LmexBECdZaw";
 
 // cria a instância do cliente
 const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
