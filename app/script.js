@@ -1,63 +1,71 @@
+// Configuração Supabase
+
+const SUPABASE_URL = "https://Gerenciador.supabase.co";
+const SUPABASE_ANON_KEY = "lJPfumEnDzlMaMnM";
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const taskForm = document.getElementById("taskForm");
 const taskInput = document.getElementById("taskInput");
 const taskList = document.getElementById("taskList");
 
-let tasks = [];
+// READ - carregar tarefas
+async function loadTasks() {
+  const { data, error } = await supabase
+    .from("tasks")
+    .select("*")
+    .order("id", { ascending: true });
+  if (error) {
+    console.error(error);
+    return;
+  }
+  renderTasks(data);
+}
 
-// CREATE
-taskForm.addEventListener("submit", function (e) {
+// CREATE - adicionar tarefa
+
+taskForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const taskText = taskInput.value.trim();
-  if (taskText !== "") {
-    const task = { id: Date.now(), text: taskText };
-    tasks.push(task);
-    renderTasks();
+  const text = taskInput.value.trim();
+  if (text) {
+    const { error } = await supabase.from("tasks").insert([{ text }]);
+    if (error) console.error(error);
     taskInput.value = "";
+    loadTasks();
   }
 });
 
-// READ + RENDER
-function renderTasks() {
+// UPDATE - editar tarefa
+
+async function editTask(id, oldText) {
+  const newText = prompt("Editar tarefa:", oldText);
+  if (newText && newText.trim() !== "") {
+    const { error } = await supabase
+      .from("tasks")
+      .update({ text: newText })
+      .eq("id", id);
+    if (error) console.error(error);
+    loadTasks();
+  }
+}
+
+// DELETE - excluir tarefa
+
+async function deleteTask(id) {
+  const { error } = await supabase.from("tasks").delete().eq("id", id);
+  if (error) console.error(error);
+  loadTasks();
+}
+
+// Renderizar lista
+
+function renderTasks(tasks) {
   taskList.innerHTML = "";
   tasks.forEach((task) => {
     const li = document.createElement("li");
-    const span = document.createElement("span");
-    span.textContent = task.text;
-
-    const actions = document.createElement("div");
-    actions.className = "actions";
-
-    // UPDATE
-    const editBtn = document.createElement("button");
-    editBtn.textContent = "Editar";
-    editBtn.className = "edit";
-    editBtn.onclick = () => editTask(task.id);
-
-    // DELETE
-    const deleteBtn = document.createElement("button");
-    deleteBtn.textContent = "Excluir";
-    deleteBtn.className = "delete";
-    deleteBtn.onclick = () => deleteTask(task.id);
-
-    actions.appendChild(editBtn);
-    actions.appendChild(deleteBtn);
-
-    li.appendChild(span);
-    li.appendChild(actions);
+    li.innerHTML = ` <span>${task.text}</span> <div class="actions"> <button onclick="editTask(${task.id}, '${task.text}')">Editar</button> <button onclick="deleteTask(${task.id})">Excluir</button> </div> `;
     taskList.appendChild(li);
   });
 }
 
-function editTask(id) {
-  const task = tasks.find((t) => t.id === id);
-  const newText = prompt("Editar tarefa:", task.text);
-  if (newText !== null && newText.trim() !== "") {
-    task.text = newText.trim();
-    renderTasks();
-  }
-}
+// Inicializar
 
-function deleteTask(id) {
-  tasks = tasks.filter((t) => t.id !== id);
-  renderTasks();
-}
+loadTasks();
