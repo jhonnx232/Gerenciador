@@ -1,7 +1,7 @@
 // Configuração Supabase
 const { createClient } = supabase; // pega a função do SDK
 
-const SUPABASE_URL = "https://Gerenciador.supabase.co";
+const SUPABASE_URL = "https://gubkxlyqoxiqunetallh.supabase.co";
 const SUPABASE_ANON_KEY = "lJPfumEnDzlMaMnM";
 
 // cria a instância do cliente
