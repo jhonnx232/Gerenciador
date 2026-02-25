@@ -1,15 +1,19 @@
 // Configuração Supabase
+const { createClient } = supabase; // pega a função do SDK
 
 const SUPABASE_URL = "https://Gerenciador.supabase.co";
 const SUPABASE_ANON_KEY = "lJPfumEnDzlMaMnM";
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// cria a instância do cliente
+const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 const taskForm = document.getElementById("taskForm");
 const taskInput = document.getElementById("taskInput");
 const taskList = document.getElementById("taskList");
 
 // READ - carregar tarefas
 async function loadTasks() {
-  const { data, error } = await supabase
+  const { data, error } = await client
     .from("tasks")
     .select("*")
     .order("id", { ascending: true });
@@ -21,12 +25,11 @@ async function loadTasks() {
 }
 
 // CREATE - adicionar tarefa
-
 taskForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const text = taskInput.value.trim();
   if (text) {
-    const { error } = await supabase.from("tasks").insert([{ text }]);
+    const { error } = await client.from("tasks").insert([{ text }]);
     if (error) console.error(error);
     taskInput.value = "";
     loadTasks();
@@ -34,11 +37,10 @@ taskForm.addEventListener("submit", async (e) => {
 });
 
 // UPDATE - editar tarefa
-
 async function editTask(id, oldText) {
   const newText = prompt("Editar tarefa:", oldText);
   if (newText && newText.trim() !== "") {
-    const { error } = await supabase
+    const { error } = await client
       .from("tasks")
       .update({ text: newText })
       .eq("id", id);
@@ -48,24 +50,27 @@ async function editTask(id, oldText) {
 }
 
 // DELETE - excluir tarefa
-
 async function deleteTask(id) {
-  const { error } = await supabase.from("tasks").delete().eq("id", id);
+  const { error } = await client.from("tasks").delete().eq("id", id);
   if (error) console.error(error);
   loadTasks();
 }
 
 // Renderizar lista
-
 function renderTasks(tasks) {
   taskList.innerHTML = "";
   tasks.forEach((task) => {
     const li = document.createElement("li");
-    li.innerHTML = ` <span>${task.text}</span> <div class="actions"> <button onclick="editTask(${task.id}, '${task.text}')">Editar</button> <button onclick="deleteTask(${task.id})">Excluir</button> </div> `;
+    li.innerHTML = `
+      <span>${task.text}</span>
+      <div class="actions">
+        <button onclick="editTask(${task.id}, '${task.text}')">Editar</button>
+        <button onclick="deleteTask(${task.id})">Excluir</button>
+      </div>
+    `;
     taskList.appendChild(li);
   });
 }
 
 // Inicializar
-
 loadTasks();
